@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set \
+  -o nounset \
+  -o pipefail \
+  -o errexit
+
+# required environment variables
+: ${ASDF_INSTALL_TYPE?}
+: ${ASDF_INSTALL_VERSION?}
+: ${ASDF_INSTALL_PATH?}
+
+readonly repository="bitwarden/cli"
+readonly toolname="bw"
+
+# make a temporary download directory with a cleanup hook
+readonly TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
+trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
+
+install () {
+  local -r install_type="$1"
+  local -r version="$2"
+  local -r install_path="$3"
+
+  local -r bin_install_path="${install_path}/bin"
+  local -r download_url="$(get_download_url "${version}")"
+  local -r download_path="${TMP_DOWNLOAD_DIR}/$(basename "${download_url}")"
+
+  echo "Downloading ${toolname} version ${version} from ${download_url}"
+  if curl -fsL "${download_url}" -o "${download_path}"; then
+    echo "Cleaning ${toolname} previous binaries"
+    rm -rf "${bin_install_path}/${toolname}"
+
+    echo "Creating ${toolname} bin directory"
+    mkdir -p "${bin_install_path}"
+
+    echo "Extracting ${toolname} archive"
+    unzip -qq "$download_path" -d "$bin_install_path"
+    chmod +x "$bin_install_path/bw"
+  else
+    echo "Error: ${toolname} version ${version} not found" >&2
+    exit 1
+  fi
+}
+
+get_arch () {
+  uname | tr '[:upper:]' '[:lower:]'
+}
+
+get_download_url () {
+  local -r version="$1"
+  local -r arch="$(get_arch)"
+  echo "https://github.com/$repository/releases/download/$version/${toolname}-${arch}-${version/v}.zip"
+}
+
+install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"

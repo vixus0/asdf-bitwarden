@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set \
+  -o errexit \
+  -o nounset \
+  -o pipefail
+
+readonly repository="bitwarden/cli"
+
+cmd="curl -s"
+if [ -n "${OAUTH_TOKEN:-}" ]; then
+  cmd="$cmd -H 'Authorization: token $OAUTH_TOKEN'"
+fi
+cmd="$cmd https://api.github.com/repos/$repository/releases"
+versions=$(eval $cmd | awk '/tag_name/ { print gensub(/\"(.+)\": \"(.+)\",?/, "\\2", "g") }' | sort | xargs)
+echo $versions
