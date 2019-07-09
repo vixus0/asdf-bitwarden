@@ -44,7 +44,7 @@ install () {
 }
 
 get_arch () {
-  uname | tr '[:upper:]' '[:lower:]'
+  uname | tr '[:upper:]' '[:lower:]' | sed 's/darwin/macos/g'
 }
 
 get_download_url () {
