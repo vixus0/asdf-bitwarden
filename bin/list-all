@@ -12,5 +12,5 @@ if [ -n "${OAUTH_TOKEN:-}" ]; then
   cmd="$cmd -H 'Authorization: token $OAUTH_TOKEN'"
 fi
 cmd="$cmd https://api.github.com/repos/$repository/releases"
-versions=$(eval $cmd | awk '/tag_name/ { print gensub(/\"(.+)\": \"(.+)\",?/, "\\2", "g") }' | sort | xargs)
+versions=$(eval $cmd | grep tag_name | sed 's/"tag_name": //g;s/"//g;s/,//g' | (tac 2>/dev/null || tail -r) | xargs)
 echo $versions
