@@ -50,7 +50,7 @@ get_arch () {
 get_download_url () {
   local -r version="$1"
   local -r arch="$(get_arch)"
-  echo "https://github.com/$repository/releases/download/$version/${toolname}-${arch}-${version/v}.zip"
+  echo "https://github.com/${repository}/releases/download/v${version}/${toolname}-${arch}-${version}.zip"
 }
 
 install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"

@@ -5,12 +5,16 @@ set \
   -o nounset \
   -o pipefail
 
-readonly repository="bitwarden/cli"
+readonly repository='bitwarden/cli'
 
-cmd="curl -s"
+readonly jq_script='.[] | select(.prerelease == false) | .tag_name | sub("v"; "")'
+
+cmd='curl --fail --silent'
 if [ -n "${OAUTH_TOKEN:-}" ]; then
-  cmd="$cmd -H 'Authorization: token $OAUTH_TOKEN'"
+  cmd="${cmd} -H 'Authorization: token ${OAUTH_TOKEN}'"
 fi
-cmd="$cmd https://api.github.com/repos/$repository/releases"
-versions=$(eval $cmd | grep tag_name | sed 's/"tag_name": //g;s/"//g;s/,//g' | (tac 2>/dev/null || tail -r) | xargs)
-echo $versions
+
+eval "${cmd} 'https://api.github.com/repos/${repository}/releases'"|
+  jq -r "${jq_script}" |
+  tac |
+  xargs echo
