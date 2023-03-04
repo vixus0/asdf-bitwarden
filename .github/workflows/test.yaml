@@ -1,0 +1,20 @@
+---
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  test_plugin:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bash_compat: ["32", ""]
+    env:
+      BASH_COMPAT: ${{ matrix.bash_compat }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Test plugin
+        uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: "bw --version"

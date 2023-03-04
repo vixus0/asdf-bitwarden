@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(dirname -- "$0")/constants.bash"
+source "$(dirname -- "$0")/utils.bash"
+
+download_path="${ASDF_DOWNLOAD_PATH:-$(mktemp -d -t "asdf_${toolname}_XXXXXX")}"
+[[ -z "$ASDF_DOWNLOAD_PATH" ]] && trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
+
+do_download () {
+  local -r install_type="$1"
+  local -r version="$2"
+
+  local -r download_url="$(get_download_url "${version}")"
+
+  if ! download "$download_url" "$ASDF_DOWNLOAD_PATH"; then
+    echo "Error: ${toolname} version ${version} not found" >&2
+    exit 1
+  fi
+}
+
+do_download "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}"

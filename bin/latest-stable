@@ -17,6 +17,5 @@ if [ -n "${GITHUB_TOKEN:-}" ]; then
   oauth_header=("-H" "Authorization: token $GITHUB_TOKEN")
 fi
 
-old_versions=$(get_versions "$old_repository")
-versions=$(get_versions "$repository")
-echo "$old_versions" "$versions" | xargs
+versions=("$(get_versions "$repository")")
+get_latest_version "${versions[@]}"
