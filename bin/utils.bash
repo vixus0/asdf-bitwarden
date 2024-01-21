@@ -29,7 +29,7 @@ get_download_url () {
 }
 
 get_repository () {
-  case "$1" in 
+  case "$1" in
     1.* )  echo "$old_repository" ;;
     *   )  echo "$repository" ;;
   esac
@@ -42,12 +42,12 @@ get_arch () {
 get_versions() {
   local repo="$1"
 
-  curl -s "${oauth_header[@]}" "https://api.github.com/repos/$repo/releases" | \
+  curl -s "${oauth_header[@]:-}" "https://api.github.com/repos/$repo/releases" | \
     grep "tag_name" | \
     cut -f 4 -d \" | \
     grep -E "^(cli-)?v" | \
     grep -oE "[0-9\.]+" | \
-    tac
+    $(command -v tac || echo tail -f)
 }
 
 get_latest_version () {
